@@ -1,0 +1,3 @@
+This page contains the Scratcher, Scratcher tips and Laser cut lid needed for the scratch assay described in my NSF GRFP proposal. The scratcher can be printed with an standard resin on an SLA printer, I have not tried it with an extrusion printer but it should work the same. 
+The Scratcher tips were created with 3DMaterials Superflex resin so as not to scratch the actual plastic of the tissue culture treated plate.
+The R Notebook contains the initial gene analysis code used to find potential drug combinations as well as the initial test of an RSF model built to look at genes most involved in relapse.
