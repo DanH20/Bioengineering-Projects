@@ -1,0 +1,580 @@
+---
+title: "Code for NSF GRFP Research Proposal"
+output: html_notebook
+---
+
+Analysis of MSigDB Gene Sets with Head and Neck Cancer Genes as well as DFO interacting Genes
+```{r}
+library(qusage)
+library(dplyr)
+library(readxl)
+library(openxlsx)
+library(here)
+
+##load Nucleic Acid Genes
+WPMAB = read.gmt("C:/Users/danie/Downloads/DFOProjGeneanalysis/NucleicAcidGenes/WP_PATHWAYS_OF_NUCLEIC_ACID_METABOLISM_AND_INNATE_IMMUNE_SENSING.v2023.2.Hs.gmt")
+WPMAB2 = WPMAB[[1]]
+
+GTRA = read.gmt("C:/Users/danie/Downloads/DFOProjGeneanalysis/NucleicAcidGenes/GOMF_TRANSLATION_REGULATOR_ACTIVITY_NUCLEIC_ACID_BINDING.v2023.2.Hs.gmt")
+GTRA2 = GTRA[[1]]
+
+GEAAW = read.gmt("C:/Users/danie/Downloads/DFOProjGeneanalysis/NucleicAcidGenes/GOMF_EXONUCLEASE_ACTIVITY_ACTIVE_WITH_EITHER_RIBO_OR_DEOXYRIBONUCLEIC_ACIDS_AND_PRODUCING_5_PHOSPHOMONOESTERS.v2023.2.Hs.gmt")
+GEAAW2 = GEAAW[[1]]
+
+GEAAW3 = read.gmt("C:/Users/danie/Downloads/DFOProjGeneanalysis/NucleicAcidGenes/GOMF_ENDONUCLEASE_ACTIVITY_ACTIVE_WITH_EITHER_RIBO_OR_DEOXYRIBONUCLEIC_ACIDS_AND_PRODUCING_3_PHOSPHOMONOESTERS.v2023.2.Hs.gmt")
+GEAAW32 = GEAAW3[[1]]
+
+GEAAW5 = read.gmt("C:/Users/danie/Downloads/DFOProjGeneanalysis/NucleicAcidGenes/GOMF_ENDONUCLEASE_ACTIVITY_ACTIVE_WITH_EITHER_RIBO_OR_DEOXYRIBONUCLEIC_ACIDS_AND_PRODUCING_5_PHOSPHOMONOESTERS.v2023.2.Hs.gmt")
+GEAAW52 = GEAAW5[[1]]
+
+all_nucleic_acid_genes <- c(WPMAB2, GTRA2, GEAAW2, GEAAW32, GEAAW52)
+nucleic_acid_Genes<- unique(all_nucleic_acid_genes)
+## load head and neck cancer genes
+HNCGenes = read_excel("C:/Users/danie\\/Documents/HNC Genes.xlsx", sheet = "Sheet1")
+
+##compare for similar elements
+
+HNC_NA_Genes_Overlap = intersect(nucleic_acid_Genes, HNCGenes$"Gene Symbol")
+
+##load DFO Genes
+DFOGenes = read_excel("C:/Users/danie/Documents/HNC Genes.xlsx" , sheet = "Sheet2")
+HNC_NA_DFO_Genes_Overlap = intersect(HNC_NA_Genes_Overlap, DFOGenes$"GeneSymbol")
+
+## save list as excel file
+downloads_folder = here("Downloads")
+file_path <- "NA_HNC_Genes1.xlsx"
+Genedf <- data.frame(Items = HNC_NA_Genes_Overlap)
+wb <- createWorkbook()
+addWorksheet(wb, "Gene Interaction")
+writeData(wb, sheet = "Gene Interaction", x = Genedf, startRow = 1, startCol = 1)
+saveWorkbook(wb, file_path)
+close(wb)
+cat("Excel file saved as:", file_path, "\n")
+
+
+## save list as excel file
+downloads_folder = here("Downloads")
+file_path <- "NA_HNC_DFO_Genes1.xlsx"
+Genedf <- data.frame(Items = HNC_NA_DFO_Genes_Overlap)
+wb <- createWorkbook()
+addWorksheet(wb, "Gene Interaction")
+writeData(wb, sheet = "Gene Interaction", x = Genedf, startRow = 1, startCol = 1)
+saveWorkbook(wb, file_path)
+close(wb)
+cat("Excel file saved as:", file_path, "\n")
+
+
+
+
+
+
+# Define the folder path containing the .gmt files
+folder_path <- "C:/Users/danie/Downloads/DFOProjGeneanalysis/LactateGenes"
+
+# Get a list of all .gmt files in the folder
+gmt_files <- list.files(folder_path, pattern = "\\.gmt$", full.names = TRUE)
+
+# Initialize an empty list to store the first columns
+Lactate_genes_list <- list()
+
+# Loop over each file make on vecor
+for (file in gmt_files) {
+  # Read the .gmt file, returns a character vector
+  gmt_data <- read.gmt(file)
+  
+  # Combine all gene names into a single vector
+  Lactate_genes_list[[basename(file)]] <- gmt_data
+}
+
+# Sort and remove duplicates to create a list of unique gene names
+lactate_genes_final <- unique(Lactate_genes_list)
+
+
+# Initialize an empty vector to store all gene names
+lactate_gene_names <- c()
+
+# Loop through each list and combine all gene names into one vector
+for (file_name in names(Lactate_genes_list)) {
+  gene_names <- unlist(Lactate_genes_list[[file_name]])
+  # Combine all gene names into a single vector
+  lactate_gene_names <- c(lactate_gene_names, gene_names)
+}
+
+# Get unique gene names
+unique_gene_names <- unique(lactate_gene_names)
+
+final_Lactate_Genes = unique_gene_names
+
+##compare for similar elements
+
+HNC_LG_Genes_Overlap = intersect(final_Lactate_Genes, HNCGenes$"Gene Symbol")
+
+HNC_LG_DFO_Genes_Overlap = intersect(HNC_LG_Genes_Overlap, DFOGenes$"GeneSymbol")
+
+## save list as excel file
+downloads_folder = here("Downloads")
+file_path <- "Lactate_HNC_Genes2.xlsx"
+Genedf <- data.frame(Items = HNC_LG_Genes_Overlap)
+wb <- createWorkbook()
+addWorksheet(wb, "Gene Interaction")
+writeData(wb, sheet = "Gene Interaction", x = Genedf, startRow = 1, startCol = 1)
+saveWorkbook(wb, file_path)
+close(wb)
+cat("Excel file saved as:", file_path, "\n")
+
+
+## save list as excel file
+downloads_folder = here("Downloads")
+file_path <- "Lactate_HNC_DFO_Genes2.xlsx"
+Genedf <- data.frame(Items = HNC_LG_DFO_Genes_Overlap)
+wb <- createWorkbook()
+addWorksheet(wb, "Gene Interaction")
+writeData(wb, sheet = "Gene Interaction", x = Genedf, startRow = 1, startCol = 1)
+saveWorkbook(wb, file_path)
+close(wb)
+cat("Excel file saved as:", file_path, "\n")
+```
+
+
+Analysis of Potential CTED combinations
+```{r}
+# Load required libraries
+library(tidyverse)
+
+file_path = "C:/Users/danie/Downloads/CTD_chem_gene_ixns.tsv/CTD_chem_gene_ixns.tsv"
+#read ctd
+read_ctd_data <- function(file_path) {
+  read_tsv(file_path, col_names = TRUE) %>%
+    select(GeneSymbol, ChemicalName, InteractionActions)
+}
+
+# calculate interaction score
+calculate_interaction_score <- function(interaction) {
+  # This is a simplified scoring system. Adjust as needed.
+  str_count(interaction, "increases|decreases|affects")
+}
+
+# drug interactin search function
+search_drug_interactions <- function(gene_list, ctd_data, top_n = 10) {
+  ctd_data %>%
+    filter(GeneSymbol %in% gene_list) %>%
+    group_by(ChemicalName) %>%
+    summarise(
+      total_interactions = n(),
+      interaction_score = sum(map_dbl(InteractionActions, calculate_interaction_score))
+    ) %>%
+    arrange(desc(interaction_score), desc(total_interactions)) %>%
+    head(top_n)
+}
+
+#Using Gene list created by preious code
+gene_list <- c("HIF1", "LDHA", "TP53", "DNM1L", "SDHB", "HMOX1", "MYC", "RB1", "TET2", "CYC1", "UQCC3", "CoX4I1", "NDUFB8", "NDUF51", "SLC2A1", "HSPD1", "SOD1", "PDHB" )  # Replace with your gene list
+ctd_data <- read_ctd_data("C:/Users/danie/Downloads/CTD_chem_gene_ixns.tsv/CTD_chem_gene_ixns.tsv")  # Replace with your CTD data file path
+
+results <- search_drug_interactions(gene_list, ctd_data)
+
+library(writexl)
+
+
+write_xlsx(results, "Lactate_DFO_HNSCC_Interacting_Drugs.xlsx")
+```
+
+
+Initial Test of RSF model for looking at genes most impactful on Relapse in HNSCC
+
+Data Prep for the Model
+
+```{r}
+# Install and load required packages
+if (!requireNamespace("randomForestSRC", quietly = TRUE)) install.packages("randomForestSRC")
+if (!requireNamespace("survival", quietly = TRUE)) install.packages("survival")
+if (!requireNamespace("survminer", quietly = TRUE)) install.packages("survminer")
+if (!requireNamespace("tidyverse", quietly = TRUE)) install.packages("tidyverse")
+```
+
+```{r}
+# Load required libraries
+library(tidyverse)
+library(dplyr)
+
+# Define paths to your local files
+expr_data_path <- "C:/Users/danie/Downloads/hnsc_tcga_pan_can_atlas_2018/hnsc_tcga_pan_can_atlas_2018/data_mrna_seq_v2_rsem_zscores_ref_normal_samples.txt"
+clinical_data_path <- "C:/Users/danie/Downloads/hnsc_tcga_pan_can_atlas_2018/hnsc_tcga_pan_can_atlas_2018/data_clinical_patient.txt"
+
+# Set output directory
+outdir <- "C:/Users/danie/Documents/TCGARSFInputDataTest1"
+
+
+# Load data
+expression_data <- read_tsv(expr_data_path)
+clinical_data <- read_tsv(clinical_data_path)
+
+# Process expression data
+expression_data <- expression_data %>%
+  filter(!is.na(Hugo_Symbol)) %>%
+  group_by(Hugo_Symbol) %>%
+  mutate(row_num = row_number()) %>%
+  ungroup() %>%
+  mutate(Hugo_Symbol = ifelse(row_num > 1, paste0(Hugo_Symbol, "_", row_num), Hugo_Symbol)) %>%
+  dplyr::select(-row_num)
+
+# Get the column names
+col_names <- colnames(expression_data)
+
+# Create a regular expression pattern for TCGA patient IDs
+tcga_pattern <- "^TCGA-[A-Z0-9]{2}-[A-Z0-9]{4}-01$"
+
+# Filter column names that match the TCGA patient ID pattern
+filtered_cols <- col_names[grep(tcga_pattern, col_names)]
+
+# Process clinical data
+clinical_data <- clinical_data %>%
+  dplyr::select(PATIENT_ID,
+         OS_STATUS,
+         OS_MONTHS,
+         AGE,
+         SEX,
+         AJCC_PATHOLOGIC_TUMOR_STAGE) %>%
+  mutate(PATIENT_ID = paste0(PATIENT_ID, "-01"),
+         OS_STATUS = ifelse(OS_STATUS == "1:DECEASED", 1, 0),
+         OS_STATUS = as.numeric(OS_STATUS),
+         OS_MONTHS = as.numeric(OS_MONTHS),
+         AGE = as.numeric(AGE),
+         SEX = factor(SEX),
+         AJCC_PATHOLOGIC_TUMOR_STAGE = factor(AJCC_PATHOLOGIC_TUMOR_STAGE))
+
+
+# Remove rows with NA values
+expression_data <- na.omit(expression_data)
+clinical_data <- na.omit(clinical_data)
+
+# Ensure that we only use patients that have both expression and clinical data
+common_patients <- intersect(filtered_cols, clinical_data$PATIENT_ID)
+expression_data <- expression_data %>% 
+  dplyr::select(Hugo_Symbol, all_of(common_patients))
+clinical_data <- clinical_data %>% filter(PATIENT_ID %in% common_patients)
+
+# Split the data into training and testing sets
+set.seed(42)
+sample_size <- floor(0.8 * length(common_patients))
+train_patients <- sample(common_patients, size = sample_size)
+test_patients <- setdiff(common_patients, train_patients)
+
+# Prepare training data
+train_expr_data <- expression_data %>% 
+  dplyr::select(Hugo_Symbol, all_of(train_patients))
+train_clinical_data <- clinical_data %>% 
+  filter(PATIENT_ID %in% train_patients)
+
+# Prepare test data
+test_expr_data <- expression_data %>% 
+  dplyr::select(Hugo_Symbol, all_of(test_patients))
+test_clinical_data <- clinical_data %>% 
+  filter(PATIENT_ID %in% test_patients)
+
+# Write training expression data to file
+write.table(train_expr_data, file = file.path(outdir, "trainset_expression.txt"), 
+            quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+
+# Write training clinical data to file
+write.table(train_clinical_data, file = file.path(outdir, "trainset_clinical.txt"), 
+            quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+
+# Write test expression data to file
+write.table(test_expr_data, file = file.path(outdir, "testset_expression.txt"), 
+            quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+
+# Write test clinical data to file
+write.table(test_clinical_data, file = file.path(outdir, "testset_clinical.txt"), 
+            quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+```
+
+Training the Model
+
+```{r}
+# Install and load necessary packages
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install(c("genefilter", "randomForest", "ROCR", "Hmisc"))
+```
+
+```{r}
+
+
+library(randomForest)
+library(ROCR)
+library(genefilter)
+library(Hmisc)
+
+# Set the working directory and file names for Input/output
+setwd("C:/Users/danie/Downloads/TCGAHNSCRSFTest1/MLTest")
+datafile <- "C:/Users/danie/Documents/TCGARSFInputDataTest1/trainset_expression.txt" 
+clindatafile <- "C:/Users/danie/Documents/TCGARSFInputDataTest1/trainset_clinical.txt"
+outfile <- "TCGATest3trainset_RFoutput.txt"
+varimp_pdffile <- "TCGATest3trainset_varImps.pdf"
+MDS_pdffile <- "TCGATest3trainset_MDS.pdf"
+ROC_pdffile <- "TCGATest3trainset_ROC.pdf"
+case_pred_outfile <- "TCGATest3trainset_CasePredictions.txt"
+vote_dist_pdffile <- "TCGATest3trainset_vote_dist.pdf"
+
+
+# Read in the data sets
+data_import <- read.table(datafile, header = TRUE, row.names = 1, na.strings = "NA", sep="\t")
+clin_data_import <- read.table(clindatafile, header = TRUE, na.strings = "NA", sep="\t")
+clin_data_order <- order(clin_data_import[,"PATIENT_ID"])
+clindata <- clin_data_import[clin_data_order,]
+data_order <- order(colnames(data_import)[2:length(colnames(data_import))]) + 1 # Order data without first column, then add 1 to get correct index in original file
+rawdata <- data_import[,c(1, data_order)] # grab first  columns, and then remaining columns in order determined above
+header <- colnames(rawdata)
+rawdata <- rawdata[which(!is.na(rawdata[,1])),] # Remove rows with missing gene symbol
+
+# Filter out variables (genes) not expressed or without enough variance
+X <- rawdata
+ffun <- filterfun(pOverA(p = 0.1, A = 50), cv(a = 0.5, b = 5))
+filt <- genefilter(2^X, ffun)
+filt_Data <- rawdata[filt,]
+
+# Get potential predictor variables
+predictor_data <- t(filt_Data)
+predictor_names <- c(as.vector(row.names(filt_Data))) # gene symbol
+colnames(predictor_data) <- predictor_names
+
+# Set the target variable
+target <- clindata[,"OS_STATUS"]
+target[target == 0] <- "0"
+target[target == 1] <- "1"
+target <- as.factor(target)
+
+# Run the Random Forest algorithm
+tmp <- as.vector(table(target))
+num_classes <- length(tmp)
+min_size <- tmp[order(tmp, decreasing = FALSE)[1]]
+sampsizes <- rep(min_size, num_classes)
+rf_output <- randomForest(x = predictor_data, y = target, importance = TRUE, ntree = 10001, proximity = TRUE, sampsize = sampsizes, na.action = na.omit)
+
+# Save the RF classifier
+save(rf_output, file = "TCGA_RF_model_Test3")
+load("TCGA_RF_model_Test3")
+
+# Calculate and save importance measures
+rf_importances <- importance(rf_output, scale = FALSE)
+
+confusion <- rf_output$confusion
+sensitivity <- (confusion[2,2] / (confusion[2,2] + confusion[2,1])) * 100
+specificity <- (confusion[1,1] / (confusion[1,1] + confusion[1,2])) * 100
+overall_error <- rf_output$err.rate[length(rf_output$err.rate[,1]),1] * 100
+overall_accuracy <- 100 - overall_error
+class1_error <- paste(rownames(confusion)[1], " error rate= ", confusion[1,3], sep="")
+class2_error <- paste(rownames(confusion)[2], " error rate= ", confusion[2,3], sep="")
+
+sens_out <- paste("sensitivity=", sensitivity, sep="")
+spec_out <- paste("specificity=", specificity, sep="")
+err_out <- paste("overall error rate=", overall_error, sep="")
+acc_out <- paste("overall accuracy=", overall_accuracy, sep="")
+misclass_1 <- paste(confusion[1,2], rownames(confusion)[1], "misclassified as", colnames(confusion)[2], sep=" ")
+misclass_2 <- paste(confusion[2,1], rownames(confusion)[2], "misclassified as", colnames(confusion)[1], sep=" ")
+confusion_out <- confusion[1:2,1:2]
+confusion_out <- cbind(rownames(confusion_out), confusion_out)
+
+write.table(rf_importances[,4], file=outfile, sep="\t", quote=FALSE, col.names=FALSE)
+write("confusion table", file=outfile, append=TRUE)
+write.table(confusion_out, file=outfile, sep="\t", quote=FALSE, col.names=TRUE, row.names=FALSE, append=TRUE)
+write(c(sens_out, spec_out, acc_out, err_out, class1_error, class2_error, misclass_1, misclass_2), file=outfile, append=TRUE)
+
+pdf(file=varimp_pdffile)
+varImpPlot(rf_output, type=2, n.var=30, scale=FALSE, main="Variable Importance (Gini) for top 30 predictors")
+dev.off()
+
+pdf(file=MDS_pdffile)
+target_labels <- as.vector(target)
+target_labels[target_labels == "0"] <- "N"
+target_labels[target_labels == "1"] <- "R"
+MDSplot(rf_output, target, k=2, xlab="", ylab="", pch=target_labels, palette=c("red", "blue"), main="MDS plot")
+dev.off()
+
+predictions <- as.vector(rf_output$votes[,2])
+pred <- prediction(predictions, target)
+perf_AUC <- performance(pred, "auc")
+AUC <- perf_AUC@y.values[[1]]
+perf_ROC <- performance(pred, "tpr", "fpr")
+pdf(file=ROC_pdffile)
+plot(perf_ROC, main="ROC plot")
+text(0.5, 0.5, paste("AUC = ", format(AUC, digits=5, scientific=FALSE)))
+dev.off()
+
+options(digits=2)
+pdf(file=vote_dist_pdffile)
+out <- histbackback(split(rf_output$votes[,"1"], target), probability=FALSE, xlim=c(-50,50), main="Vote distributions for patients classified by RF", axes=TRUE, ylab="Fraction votes (1)")
+barplot(-out$left, col="red", horiz=TRUE, space=0, add=TRUE, axes=FALSE)
+barplot(out$right, col="blue", horiz=TRUE, space=0, add=TRUE, axes=FALSE)
+dev.off()
+
+case_predictions <- cbind(clindata, target, rf_output$predicted, rf_output$votes)
+write.table(case_predictions, file=case_pred_outfile, sep="\t", quote=FALSE, col.names=TRUE, row.names=FALSE)
+
+
+```
+
+
+Testing the Model
+
+```{r}
+# Install and load necessary packages
+if (!requireNamespace("randomForest", quietly = TRUE)) install.packages("randomForest")
+if (!requireNamespace("pROC", quietly = TRUE)) install.packages("pROC")
+if (!requireNamespace("dplyr", quietly = TRUE)) install.packages("dplyr")
+if (!requireNamespace("readr", quietly = TRUE)) install.packages("readr")
+```
+
+```{r}
+
+
+library(randomForest)
+library(pROC)
+library(dplyr)
+library(readr)
+
+# Set working directory and filenames for Input/output
+setwd("C:/Users/danie/Downloads/TCGAHNSCRSFTest1/MLTest/TestsetTest1")
+datafile <- "C:/Users/danie/Documents/TCGARSFInputDataTest1/testset_expression.txt" 
+clindatafile <- "C:/Users/danie/Documents/TCGARSFInputDataTest1/testset_clinical.txt"
+RF_model_file <- "C:/Users/danie/Documents/TCGA_RF_model_Test3"
+outfile <- "TCGATest1_testset_RFoutput.txt"
+case_pred_outfile <- "TCGATest1_testset_CasePredictions.txt"
+ROC_pdffile <- "TCGATest1_testset_ROC.pdf"
+vote_dist_pdffile <- "TCGATest1_testset_vote_dist.pdf"
+outdir <- "C:/Users/danie/Downloads/TCGA_TestSet_RSFTest1"
+
+# Read in the data sets
+data_import <- read.table(datafile, header = TRUE, row.names = 1, na.strings = "NA", sep="\t")
+clin_data_import <- read.table(clindatafile, header = TRUE, na.strings = "NA", sep="\t")
+clin_data_order <- order(clin_data_import[,"PATIENT_ID"])
+clindata <- clin_data_import[clin_data_order,]
+data_order <- order(colnames(data_import)[2:length(colnames(data_import))]) + 1 # Order data without first column, then add 1 to get correct index in original file
+rawdata <- data_import[,c(1, data_order)] # grab first  columns, and then remaining columns in order determined above
+header <- colnames(rawdata)
+rawdata <- rawdata[which(!is.na(rawdata[,1])),] # Remove rows with missing gene symbol
+
+
+
+# Get potential predictor variables
+predictor_data <- t(rawdata)
+predictor_names <- c(as.vector(row.names(rawdata))) # gene symbol
+colnames(predictor_data) <- predictor_names
+
+
+# Load the RandomForests classifier from file
+load(file = RF_model_file)
+
+# Subset the test data to predictors in the RF model
+RF_predictor_names <- rownames(rf_output$importance)
+predictor_data <- predictor_data[, RF_predictor_names, drop = FALSE]
+
+# Run the test data through the forest
+RF_predictions_responses <- predict(rf_output, predictor_data, type = "response")
+RF_predictions_votes <- predict(rf_output, predictor_data, type = "vote")
+
+
+
+# Assuming the sample identifiers are stored in a column called 'geo_accn' in clin_data_import
+sample_identifiers <- clin_data_import$PATIENT_ID
+
+
+
+# Filter the prediction vectors to match the sample identifiers in clin_data_import
+#RF_predictions_responses_filtered <- RF_predictions_responses[sample_identifiers]
+#RF_predictions_votes_filtered <- RF_predictions_votes[sample_identifiers]
+
+
+
+# Combine the clinical data with the filtered predictions
+clindata_plusRF <- cbind(clin_data_import, RF_predictions_responses , RF_predictions_votes)
+# Assuming 'Relapse' and 'NoRelapse' are the values you want to filter
+#clindata_plusRF <- clindata_plusRF %>%
+ # filter(RF_predictions_responses %in% c("0", "1"))
+
+# Write the combined data to a file
+write.table(clindata_plusRF, file.path(outdir, "clindata_plusRF.txt"), quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+
+
+#clean_data <- na.omit(clindata_plusRF)
+
+# Extract the relevant columns from the cleaned data
+#true_labels <- clean_data$event.rfs
+#predictions <- clean_data$RF_predictions_responses
+
+# Ensure the lengths are the same
+#if (length(true_labels) != length(predictions)) {
+#  stop("The lengths of true_labels and predictions do not match after filtering.")
+#}
+
+
+
+
+
+confusion <- table(Predicted = clindata_plusRF$RF_predictions_responses, 
+                   Actual = clindata_plusRF$OS_STATUS)
+#print(confusion)
+
+# Calculate performance metrics
+sensitivity <- (confusion["1", "1"] / sum(confusion[, "1"])) * 100
+specificity <- (confusion["0", "0"] / sum(confusion[, "0"])) * 100
+overall_error <- (sum(confusion) - sum(diag(confusion))) / sum(confusion) * 100
+overall_accuracy <- sum(diag(confusion)) / sum(confusion) * 100
+
+# Print the results
+print(paste("Sensitivity:", round(sensitivity, 2), "%"))
+print(paste("Specificity:", round(specificity, 2), "%"))
+print(paste("Overall Error:", round(overall_error, 2), "%"))
+print(paste("Overall Accuracy:", round(overall_accuracy, 2), "%"))
+
+# Prepare statistics for output
+sens_out <- paste("sensitivity=", sensitivity, sep = "")
+spec_out <- paste("specificity=", specificity, sep = "")
+err_out <- paste("overall error rate=", overall_error, sep = "")
+acc_out <- paste("overall accuracy=", overall_accuracy, sep = "")
+misclass_0 <- paste(confusion["1", "0"], "NoRelapse misclassified as Relapse", sep = " ")
+misclass_1 <- paste(confusion["0", "1"], "Relapse misclassified as NoRelapse", sep = " ")
+confusion_out <- as.data.frame.matrix(confusion)
+
+# Create variables for known target class and predicted class probabilities
+target <- factor(clindata_plusRF$OS_STATUS, levels = c("0", "1"))
+relapse_scores <- as.numeric(as.character(clindata_plusRF$RF_predictions_responses))
+
+# Calculate AUC and plot ROC curve
+roc_curve <- roc(target, relapse_scores)
+AUC <- auc(roc_curve)
+AUC_out <- paste("AUC=", AUC, sep = "")
+
+# Write results to file
+write("confusion table", file = outfile)
+write.table(confusion_out, file = outfile, sep = "\t", quote = FALSE, col.names = TRUE, row.names = TRUE, append = TRUE)
+write(c(sens_out, spec_out, acc_out, err_out, misclass_0, misclass_1, AUC_out), file = outfile, append = TRUE)
+
+# Plot ROC curve
+pdf(file = ROC_pdffile)
+plot.roc(roc_curve, main = "ROC plot")
+text(0.5, 0.5, paste("AUC = ", format(AUC, digits = 5, scientific = FALSE)))
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+```{r}
+
+```
+
